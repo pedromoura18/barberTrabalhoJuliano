@@ -21,12 +21,6 @@ public class UsersController {
         this.userService = userService;
     }
 
-    @GetMapping
-    @Operation(summary = "Listar todos", description = "Retorna a lista de todos os usuários cadastrados.")
-    public ResponseEntity<List<UserCreationDTO>> getAll() {
-        return ResponseEntity.ok(this.userService.findAll());
-    }
-
     @GetMapping("/{id}")
     @Operation(summary = "Buscar por ID", description = "Retorna um usuário específico pelo seu ID.")
     public ResponseEntity<UserCreationDTO> getById(@PathVariable UUID id) {
