@@ -15,14 +15,11 @@ import java.util.*;
 @Tag(name = "Usuários", description = "Gerenciamento de usuários da barbearia")
 public class UsersController {
 
-    private List<UserCreationDTO> users = new ArrayList<>();
-
-    private UserService userService;
+    private final UserService userService;
 
     public UsersController(UserService userService) {
         this.userService = userService;
     }
-
 
     @GetMapping
     @Operation(summary = "Listar todos", description = "Retorna a lista de todos os usuários cadastrados.")
@@ -30,18 +27,14 @@ public class UsersController {
         return ResponseEntity.ok(this.userService.findAll());
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Buscar por ID", description = "Retorna um usuário específico pelo seu ID.")
+    public ResponseEntity<UserCreationDTO> getById(@PathVariable UUID id) {
+        Optional<UserCreationDTO> userOptional = this.userService.findById(id);
 
-    @PutMapping("/{id}")
-    @Operation(summary = "Atualizar usuário", description = "Atualiza as informações de um usuário existente.")
-    public ResponseEntity<UserCreationDTO> update(@PathVariable UUID id, @RequestBody UserCreationDTO updatedUser) {
-        for (int i = 0; i < users.size(); i++) {
-            if (users.get(i).getId().equals(id)) {
-                updatedUser.setId(id);
-                users.set(i, updatedUser);
-                return ResponseEntity.ok(updatedUser);
-            }
+        if (userOptional.isPresent()) {
+            return ResponseEntity.ok(userOptional.get());
         }
-
         return ResponseEntity.notFound().build();
     }
 
@@ -49,34 +42,36 @@ public class UsersController {
     @Operation(summary = "Criar usuário", description = "Cria um novo usuário na barbearia.")
     public ResponseEntity<UserCreationDTO> create(@RequestBody UserCreationDTO user) {
         UserCreationDTO newUser = this.userService.create(user);
-
         return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Atualizar usuário", description = "Atualiza as informações de um usuário existente.")
+    public ResponseEntity<UserCreationDTO> update(@PathVariable UUID id, @RequestBody UserCreationDTO updatedUser) {
+        Optional<UserCreationDTO> userOptional = this.userService.update(id, updatedUser);
+
+        if (userOptional.isPresent()) {
+            return ResponseEntity.ok(userOptional.get());
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PatchMapping("/{id}/avatar")
     @Operation(summary = "Atualizar avatar do usuário", description = "Atualiza o avatar de um usuário existente.")
-    public ResponseEntity<UserCreationDTO> patchUser(@PathVariable UUID id, @RequestBody Map<String, Object> avatar) {
-        Optional<UserCreationDTO> userOptional = users.stream()
-                .filter(u -> u.getId().equals(id))
-                .findFirst();
+    public ResponseEntity<UserCreationDTO> patchUser(@PathVariable UUID id, @RequestBody Map<String, String> avatar) {
+        String avatarUrl = avatar.get("avatarUrl");
+        Optional<UserCreationDTO> userOptional = this.userService.updateAvatar(id, avatarUrl);
 
-        if (userOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
+        if (userOptional.isPresent()) {
+            return ResponseEntity.ok(userOptional.get());
         }
-
-        UserCreationDTO existingUser = userOptional.get();
-
-        if (avatar.containsKey("avatarUrl")) {
-            existingUser.setAvatarUrl((String) avatar.get("avatarUrl"));
-        }
-
-        return ResponseEntity.ok(existingUser);
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Excluir usuário", description = "Exclui um usuário existente.")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        boolean removed = users.removeIf(u -> u.getId().equals(id));
+        boolean removed = this.userService.delete(id);
 
         if (removed) {
             return ResponseEntity.noContent().build();
@@ -87,7 +82,7 @@ public class UsersController {
     @DeleteMapping("/clear")
     @Operation(summary = "Limpar usuários", description = "Remove todos os usuários cadastrados.")
     public ResponseEntity<Void> clearUsers() {
-        this.users.clear();
+        this.userService.clear();
         return ResponseEntity.noContent().build();
     }
 }

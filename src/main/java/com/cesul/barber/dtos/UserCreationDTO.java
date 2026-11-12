@@ -1,5 +1,6 @@
 package com.cesul.barber.dtos;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class UserCreationDTO {
@@ -7,6 +8,16 @@ public class UserCreationDTO {
     private String name;
     private String email;
     private String avatarUrl;
+
+    public UserCreationDTO() {
+    }
+
+    public UserCreationDTO(UUID id, String name, String email, String avatarUrl) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.avatarUrl = avatarUrl;
+    }
 
     public UUID getId() {
         return id;
@@ -40,5 +51,26 @@ public class UserCreationDTO {
         this.email = email;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserCreationDTO that = (UserCreationDTO) o;
+        return Objects.equals(id, that.id);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "UserCreationDTO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", avatarUrl='" + avatarUrl + '\'' +
+                '}';
+    }
 }
