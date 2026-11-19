@@ -3,6 +3,8 @@ package com.cesul.barber.controllers;
 import com.cesul.barber.dtos.UserCreationDTO;
 import com.cesul.barber.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,12 @@ public class UsersController {
 
     public UsersController(UserService userService) {
         this.userService = userService;
+    }
+
+    @GetMapping
+    @Operation(summary = "Listar todos", description = "Retorna a lista de todos os usuários cadastrados.")
+    public ResponseEntity<List<UserCreationDTO>> getAll() {
+        return ResponseEntity.ok(this.userService.findAll());
     }
 
     @GetMapping("/{id}")
@@ -52,8 +60,17 @@ public class UsersController {
 
     @PatchMapping("/{id}/avatar")
     @Operation(summary = "Atualizar avatar do usuário", description = "Atualiza o avatar de um usuário existente.")
-    public ResponseEntity<UserCreationDTO> patchUser(@PathVariable UUID id, @RequestBody Map<String, String> avatar) {
-        String avatarUrl = avatar.get("avatarUrl");
+    public ResponseEntity<UserCreationDTO> patchUser(
+            @PathVariable UUID id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    value = "{\"avatarUrl\": \"https://exemplo.com/foto.png\"}"
+                            )
+                    )
+            )
+            @RequestBody Map<String, String> avatar) {
+        String avatarUrl = avatar != null ? avatar.get("avatarUrl") : null;
         Optional<UserCreationDTO> userOptional = this.userService.updateAvatar(id, avatarUrl);
 
         if (userOptional.isPresent()) {
