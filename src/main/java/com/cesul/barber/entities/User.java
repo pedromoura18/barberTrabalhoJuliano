@@ -1,4 +1,4 @@
-package com.cesul.barber.models;
+package com.cesul.barber.entities;
 
 import jakarta.persistence.*;
 
@@ -87,4 +87,3 @@ public class User {
                 '}';
     }
 }
-
