@@ -65,7 +65,7 @@ public class UsersController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(
                             examples = @ExampleObject(
-                                    value = "{\"avatarUrl\": \"https://exemplo.com/foto.png\"}"
+                                    value = "{\"avatarUrl\": \"string\"}"
                             )
                     )
             )
